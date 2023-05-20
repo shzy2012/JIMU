@@ -1,0 +1,6 @@
+vendor
+.vscode
+*.
+.idea
+.DS_Store
+app

@@ -1,0 +1,16 @@
+# This is a TOML document.
+desc = "xxx项目"
+
+# HTTP 服务器配置 #
+[server]
+run_mode = "debug" # 运行模式: release debug
+read_timeout = 60
+write_timeout = 60
+
+
+# 数据库配置 #
+[mongodb]
+uri = "mongodb://localhost:27017"
+username = "name"
+password = "passwd"
+database = "db_xxx"
