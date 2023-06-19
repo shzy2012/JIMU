@@ -15,7 +15,7 @@ func (x *API) AddOrUpdate(c *gin.Context) {
 	param := ReqDto{}
 	err := c.BindJSON(&param)
 	if err != nil {
-		c.JSON(400, err.Error())
+		c.JSON(412, err.Error())
 		return
 	}
 	log.Printf("[param]=>%+v\n", param)
@@ -27,7 +27,7 @@ func (x *API) Get(c *gin.Context) {
 	id := c.Query("id")
 	log.Printf("[param]=>%s\n", id)
 	if tools.IsEmpty(id) {
-		c.JSON(400, "")
+		c.JSON(412, "")
 		return
 	}
 	c.JSON(200, "")
@@ -37,7 +37,7 @@ func (x *API) Del(c *gin.Context) {
 	id := c.Query("id")
 	log.Printf("[param]=>%s\n", id)
 	if tools.IsEmpty(id) {
-		c.JSON(400, "id不能为空")
+		c.JSON(412, "id不能为空")
 		return
 	}
 
@@ -48,7 +48,7 @@ func (x *API) List(c *gin.Context) {
 	param := Params{}
 	err := c.BindJSON(&param)
 	if err != nil {
-		c.JSON(400, err.Error())
+		c.JSON(412, err.Error())
 		return
 	}
 	log.Printf("[param]=>%+v\n", param)
