@@ -85,19 +85,26 @@ func (x *DB[T]) DelMany(filter primitive.M) error {
 	return err
 }
 
-// 获取列表
-func (x *DB[T]) List(filter primitive.M, index, limit, desc int64) (*[]T, error) {
+/*
+	获取列表
+
+filter:过滤条件
+index:分页索引
+limit:分页大小
+*/
+func (x *DB[T]) List(filter primitive.M, orderby primitive.M, index, limit int64) (*[]T, error) {
 	collection := GetCollection(x.s2n(*new(T)))
 	if filter == nil {
 		filter = bson.M{}
 	}
+	if orderby == nil {
+		orderby = bson.M{"_id": -1}
+	}
 	results := []T{}
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
-	options := options.Find().SetLimit(limit).SetSkip(limit * index)
-	if desc == 1 || desc == -1 {
-		options.SetSort(bson.M{"_id": desc})
-	}
+
+	options := options.Find().SetSort(orderby).SetLimit(limit).SetSkip(limit * index)
 	cursor, err := collection.Find(ctx, filter, options)
 	if err != nil {
 		return &results, err
@@ -120,20 +127,26 @@ func (x *DB[T]) List(filter primitive.M, index, limit, desc int64) (*[]T, error)
 	return &results, err
 }
 
-// 获取列表
-func (x *DB[T]) ListOrderBy(filter primitive.M, orderby primitive.M, index, limit int64) (*[]T, error) {
+/*
+	获取列表（排序）
+
+filter:过滤条件
+index:分页索引
+limit:分页大小
+desc:排序方式 1:正序,-1:倒序
+*/
+func (x *DB[T]) ListOrderBy(filter primitive.M, index, limit, desc int64) (*[]T, error) {
 	collection := GetCollection(x.s2n(*new(T)))
 	if filter == nil {
 		filter = bson.M{}
 	}
-	if orderby == nil {
-		orderby = bson.M{"_id": -1}
-	}
 	results := []T{}
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
-
-	options := options.Find().SetSort(orderby).SetLimit(limit).SetSkip(limit * index)
+	options := options.Find().SetLimit(limit).SetSkip(limit * index)
+	if desc == 1 || desc == -1 {
+		options.SetSort(bson.M{"_id": desc})
+	}
 	cursor, err := collection.Find(ctx, filter, options)
 	if err != nil {
 		return &results, err
@@ -172,7 +185,7 @@ func (x *DB[T]) Paging(filter bson.M, index, limit, desc int64) (*Page, error) {
 		filter = bson.M{}
 	}
 
-	data, err := x.List(filter, index, limit, desc)
+	data, err := x.ListOrderBy(filter, index, limit, desc)
 	if err != nil {
 		return &page, nil
 	}

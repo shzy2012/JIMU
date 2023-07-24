@@ -166,3 +166,8 @@ func JoinURL(base string, paths ...string) string {
 	u.Path = path.Join(u.Path, path.Join(paths...))
 	return u.String()
 }
+
+// Trim  trim string
+func Trim(str string) string {
+	return strings.TrimSpace(str)
+}
