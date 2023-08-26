@@ -13,7 +13,7 @@ import (
 // InitRouter initialize routing information
 func InitRouter() *gin.Engine {
 
-	gin.SetMode(config.Serve.RunMode)
+	gin.SetMode(config.Server.RunMode)
 	r := gin.New()
 	// 中间件
 	r.Use(jwt.Log()) //请求日志

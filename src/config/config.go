@@ -9,11 +9,32 @@ import (
 	"github.com/BurntSushi/toml"
 )
 
-type MongoDB struct {
-	URI      string `yaml:"uri"`
-	Username string `yaml:"username"`
-	Password string `yaml:"password"`
-	Database string `yaml:"database"`
+// MySQL
+type MySQLCfg struct {
+	Endpoint string `toml:"endpoint"`
+	Database string `toml:"database"`
+	Username string `toml:"username"`
+	Password string `toml:"password"`
+}
+
+type MongoDBCfg struct {
+	URI      string `toml:"uri"`
+	Database string `toml:"database"`
+	Username string `toml:"username"`
+	Password string `toml:"password"`
+}
+
+type ESCfg struct {
+	Username string   `toml:"username"`
+	Password string   `toml:"password"`
+	Index    string   `toml:"index"`
+	URLs     []string `toml:"urls"`
+}
+
+type APICfg struct {
+}
+
+type FileCfg struct {
 }
 
 // 服务器配置
@@ -25,8 +46,12 @@ type ServerCfg struct {
 
 // 全局配置文件
 type Config struct {
-	Server ServerCfg `toml:"server"`
-	Mongo  MongoDB   `toml:"mongodb"`
+	Server  ServerCfg  `toml:"server"`
+	MongoDB MongoDBCfg `toml:"mongodb"`
+	MySQL   MySQLCfg   `toml:"mysql"`
+	Elastic ESCfg      `toml:"elastic"`
+	API     APICfg     `toml:"api"`
+	File    FileCfg    `toml:"file"`
 }
 
 // NewConfig 初始化配置文件
@@ -40,8 +65,11 @@ func NewConfig(path string) *Config {
 }
 
 var (
-	Serve ServerCfg
-	Mongo MongoDB
+	Server  ServerCfg
+	MongoDB MongoDBCfg
+	ES      ESCfg
+	API     APICfg
+	File    FileCfg
 )
 
 func init() {
@@ -78,7 +106,10 @@ func init() {
 		log.Fatalln("config parse failed")
 	}
 
-	Serve = cfg.Server
-	Mongo = cfg.Mongo
+	Server = cfg.Server
+	MongoDB = cfg.MongoDB
+	ES = cfg.Elastic
+	API = cfg.API
+	File = cfg.File
 	log.Printf("config from %s init ok\n", cfgPath)
 }

@@ -31,13 +31,13 @@ func init() {
 	//mongodb的用户名和密码是基于特定数据库的，而不是基于整个系统的。所有所有数据库db都需要设置密码
 	//mongodb://youruser2:yourpassword2@localhost/yourdatabase
 
-	connectString := config.Mongo.URI
+	connectString := config.MongoDB.URI
 	log.Infoln("[mongo URI]=>", connectString)
-	if config.Mongo.Username != "" {
+	if config.MongoDB.Username != "" {
 		// 设置登录凭证
 		mongoClient, err = mongo.Connect(ctx, options.Client().ApplyURI(connectString).SetAuth(options.Credential{
-			Username: config.Mongo.Username,
-			Password: config.Mongo.Password,
+			Username: config.MongoDB.Username,
+			Password: config.MongoDB.Password,
 		}))
 	} else {
 		mongoClient, err = mongo.Connect(ctx, options.Client().ApplyURI(connectString))
@@ -64,7 +64,7 @@ func GetCollection(name string) *mongo.Collection {
 	mux.Lock()
 	if mongoDB == nil {
 		//初始化链接数据库
-		mongoDB = mongoClient.Database(config.Mongo.Database)
+		mongoDB = mongoClient.Database(config.MongoDB.Database)
 	}
 	defer mux.Unlock()
 	return mongoDB.Collection(name)
