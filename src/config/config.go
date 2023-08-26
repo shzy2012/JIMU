@@ -17,6 +17,7 @@ type MySQLCfg struct {
 	Password string `toml:"password"`
 }
 
+// MongoDB
 type MongoDBCfg struct {
 	URI      string `toml:"uri"`
 	Database string `toml:"database"`
@@ -24,6 +25,7 @@ type MongoDBCfg struct {
 	Password string `toml:"password"`
 }
 
+// ES
 type ESCfg struct {
 	Username string   `toml:"username"`
 	Password string   `toml:"password"`
@@ -31,9 +33,11 @@ type ESCfg struct {
 	URLs     []string `toml:"urls"`
 }
 
+// APIs
 type APICfg struct {
 }
 
+// Files
 type FileCfg struct {
 }
 
@@ -100,7 +104,6 @@ func init() {
 		log.Fatalln("not found config")
 	}
 
-	log.Printf("[cfgpath]:%s\n", cfgPath)
 	cfg := NewConfig(cfgPath)
 	if cfg == nil {
 		log.Fatalln("config parse failed")
@@ -111,5 +114,5 @@ func init() {
 	ES = cfg.Elastic
 	API = cfg.API
 	File = cfg.File
-	log.Printf("config from %s init ok\n", cfgPath)
+	log.Printf("[config]=> %s init ok\n", cfgPath)
 }

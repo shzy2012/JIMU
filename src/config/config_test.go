@@ -10,4 +10,5 @@ func TestNewConfig(t *testing.T) {
 	if cfg != nil {
 		log.Printf("value :%+v\n", cfg)
 	}
+
 }

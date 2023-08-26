@@ -14,3 +14,22 @@ uri = "mongodb://localhost:27017"
 username = "name"
 password = "passwd"
 database = "db_xxx"
+
+
+# mysql #
+[mysql]
+username = "root"
+password = "passwd"
+database = "db_xxx"
+endpoint = "127.0.0.1:3306"
+
+# ES #
+[elastic]
+username = "name"
+password = "passwd"
+index = "db_xxx"
+urls = ["http://127.0.0.1:9200"]
+
+[apis]
+
+[files]
