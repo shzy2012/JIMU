@@ -71,7 +71,7 @@ func GetCollection(name string) *mongo.Collection {
 }
 
 // ID=>Hex
-func ToHex(id string) primitive.ObjectID {
+func FromHex(id string) primitive.ObjectID {
 	ID, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		log.Infof("id=>[%s] is %s\n", id, err.Error())
