@@ -3,6 +3,7 @@ package jwt
 import (
 	"fmt"
 	"jimu/src/tools"
+	"net/url"
 
 	"github.com/gin-gonic/gin"
 	"github.com/shzy2012/common/log"
@@ -12,7 +13,8 @@ import (
 func Log() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		r := c.Request
-		request := fmt.Sprintf("remote=>%s host=>%s method=>%s url=>%s content_length=>%v", r.RemoteAddr, r.Host, r.Method, r.URL, r.ContentLength)
+		urlStr, _ := url.QueryUnescape(r.URL.String())
+		request := fmt.Sprintf("remote=>%s host=>%s method=>%s url=>%s content_length=>%v", r.RemoteAddr, r.Host, r.Method, urlStr, r.ContentLength)
 		log.Infoln(request)
 
 		c.Next()
