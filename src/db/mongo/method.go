@@ -8,6 +8,7 @@ import (
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
@@ -21,7 +22,7 @@ type DB[T any] struct {
 func (x *DB[T]) Find(id primitive.ObjectID) (T, error) {
 	model := new(T)
 	filter := bson.M{"_id": id}
-	collection := GetCollection(x.s2n(*model))
+	collection := GetCollection(x.Struct2DbName(*model))
 	err := collection.FindOne(context.Background(), filter).Decode(model)
 	return *model, err
 }
@@ -32,7 +33,7 @@ func (x *DB[T]) Filter(filter primitive.M) (T, error) {
 	if filter == nil {
 		filter = bson.M{}
 	}
-	collection := GetCollection(x.s2n(*model))
+	collection := GetCollection(x.Struct2DbName(*model))
 	err := collection.FindOne(context.Background(), filter /*不能为nil*/).Decode(model)
 	return *model, err
 }
@@ -50,7 +51,7 @@ func (x *DB[T]) Exist(filter primitive.M) bool {
 
 // 新增1条数据
 func (x *DB[T]) Add(data T) (primitive.ObjectID, error) {
-	collection := GetCollection(x.s2n(data))
+	collection := GetCollection(x.Struct2DbName(data))
 	res, err := collection.InsertOne(context.Background(), data)
 	if err != nil {
 		return primitive.NilObjectID, err
@@ -61,7 +62,7 @@ func (x *DB[T]) Add(data T) (primitive.ObjectID, error) {
 // 更新1条记录
 func (x *DB[T]) Update(id primitive.ObjectID, data T) error {
 
-	collection := GetCollection(x.s2n(data))
+	collection := GetCollection(x.Struct2DbName(data))
 	filter := bson.M{"_id": id}
 	update := bson.M{
 		"$set": data,
@@ -73,14 +74,14 @@ func (x *DB[T]) Update(id primitive.ObjectID, data T) error {
 // 删除一条记录
 func (x *DB[T]) Del(id primitive.ObjectID) error {
 	filter := bson.M{"_id": id}
-	collection := GetCollection(x.s2n(*new(T)))
+	collection := GetCollection(x.Struct2DbName(*new(T)))
 	_, err := collection.DeleteOne(context.Background(), filter)
 	return err
 }
 
 // 删除多条记录
 func (x *DB[T]) DelMany(filter primitive.M) error {
-	collection := GetCollection(x.s2n(*new(T)))
+	collection := GetCollection(x.Struct2DbName(*new(T)))
 	_, err := collection.DeleteMany(context.Background(), filter)
 	return err
 }
@@ -94,7 +95,7 @@ limit:分页大小
 desc:排序方式 1:正序,-1:倒序
 */
 func (x *DB[T]) List(filter primitive.M, index, limit, desc int64) (*[]T, error) {
-	collection := GetCollection(x.s2n(*new(T)))
+	collection := GetCollection(x.Struct2DbName(*new(T)))
 	if filter == nil {
 		filter = bson.M{}
 	}
@@ -137,7 +138,7 @@ limit:分页大小
 desc:排序方式 1:正序,-1:倒序
 */
 func (x *DB[T]) ListOrderBy(filter primitive.M, orderby primitive.M, index, limit int64) (*[]T, error) {
-	collection := GetCollection(x.s2n(*new(T)))
+	collection := GetCollection(x.Struct2DbName(*new(T)))
 	if filter == nil {
 		filter = bson.M{}
 	}
@@ -176,7 +177,7 @@ func (x *DB[T]) Count(filter primitive.M) (int64, error) {
 	if filter == nil {
 		filter = bson.M{}
 	}
-	collection := GetCollection(x.s2n(*new(T)))
+	collection := GetCollection(x.Struct2DbName(*new(T)))
 	return collection.CountDocuments(context.Background(), filter)
 }
 
@@ -202,8 +203,24 @@ func (x *DB[T]) Paging(filter bson.M, index, limit, desc int64) (*Page, error) {
 	return &page, err
 }
 
+// 创建索引
+// https://kb.objectrocket.com/mongo-db/how-to-create-an-index-using-the-golang-driver-for-mongodb-455
+func (x *DB[T]) CreateIndex(field string, sort int /*1 自然排序(默认方式) || -1 倒序*/) error {
+	collection := GetCollection(x.Struct2DbName(*new(T)))
+	log.Printf("index: %s->%s\n", collection.Name(), field)
+	// db.members.createIndex( { "SOME_FIELD": 1 }, { unique: true } )
+	mod := mongo.IndexModel{
+		Keys: bson.M{
+			field: sort, // 1 自然排序(默认方式) || -1 倒序
+		}, Options: options.Index().SetUnique(false),
+	}
+
+	_, err := collection.Indexes().CreateOne(context.Background(), mod)
+	return err
+}
+
 // 将struct的名称转化为数据库表的名称
-func (x *DB[T]) s2n(m T) string {
+func (x *DB[T]) Struct2DbName(m T) string {
 	return strings.ToLower(fmt.Sprintf("%T", m))
 }
 

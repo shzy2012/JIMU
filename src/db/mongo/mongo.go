@@ -3,11 +3,9 @@ package mongo
 import (
 	"context"
 	"jimu/src/config"
-	"reflect"
 	"sync"
 	"time"
 
-	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -87,36 +85,4 @@ func GetHex() string {
 // New Hex
 func GetObjectID() primitive.ObjectID {
 	return primitive.NewObjectID()
-}
-
-// 初始化索引
-func InitIndexes() {
-	createIndexes()
-}
-
-// createIndexes 创建索引
-func createIndexes() {
-
-	/************************************
-	*  创建 xxx 索引
-	*************************************/
-
-	// Declare an index model object to pass to CreateOne()
-	// db.members.createIndex({"SOME_FIELD":1},{unique:true})
-	mod := mongo.IndexModel{
-		Keys: bson.M{
-			"code": 1, // 1=> index in ascending order  | -1=> index in descending order
-		}, Options: options.Index().SetUnique(true),
-	}
-
-	// Create an Index using the CreateOne() method
-	collection := GetCollection("Collection_Name")
-	ind, err := collection.Indexes().CreateOne(context.TODO(), mod)
-	// Check if the CreateOne() method returned any errors
-	if err != nil {
-		log.Fatalf("ERROR:%s\n", err)
-	} else {
-		// API call returns string of the index name
-		log.Println("Index:", ind, reflect.TypeOf(ind))
-	}
 }

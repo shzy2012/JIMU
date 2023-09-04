@@ -20,3 +20,10 @@ type Example struct {
 func NewExample() *Example {
 	return &Example{}
 }
+
+/*
+func init() {
+	// 创建索引
+	NewExample().CreateIndex("name", 1)
+}
+*/
