@@ -171,3 +171,8 @@ func JoinURL(base string, paths ...string) string {
 func Trim(str string) string {
 	return strings.TrimSpace(str)
 }
+
+// 截取包含中文的字符串
+func SubString(str string, f, e int) string {
+	return string([]rune(str)[f:e])
+}
