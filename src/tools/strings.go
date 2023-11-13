@@ -176,3 +176,15 @@ func Trim(str string) string {
 func SubString(str string, f, e int) string {
 	return string([]rune(str)[f:e])
 }
+
+func Unique(slice []string) []string {
+	keys := make(map[string]bool)
+	list := []string{}
+	for _, ele := range slice {
+		if _, value := keys[ele]; !value {
+			keys[ele] = true
+			list = append(list, ele)
+		}
+	}
+	return list
+}

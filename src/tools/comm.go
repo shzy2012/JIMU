@@ -2,6 +2,7 @@ package tools
 
 import (
 	"fmt"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -84,14 +85,16 @@ func GetRFC3339(v string) string {
 	return t.Format("2006-01-02T15:04:05Z07:00")
 }
 
-func Unique(intSlice []string) []string {
-	keys := make(map[string]bool)
-	list := []string{}
-	for _, entry := range intSlice {
-		if _, value := keys[entry]; !value {
-			keys[entry] = true
-			list = append(list, entry)
-		}
+// https://juejin.cn/post/6844903648045039624
+func IsChinesePhone(phone string) bool {
+	reg1 := regexp.MustCompile(`^1(?:3[0-9]|4[5-9]|5[0-9]|6[12456]|7[0-8]|8[0-9]|9[0-9])[0-9]{8}$`)
+	if reg1 == nil {
+		return false
 	}
-	return list
+	//根据规则提取关键信息
+	if len(reg1.FindAllStringSubmatch(phone, 1)) > 0 {
+		return true
+	}
+
+	return false
 }
