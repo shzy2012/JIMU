@@ -181,6 +181,15 @@ func (x *DB[T]) Count(filter primitive.M) (int64, error) {
 	return collection.CountDocuments(context.Background(), filter)
 }
 
+// 字段去重
+func (x *DB[T]) Distinct(fieldName string, filter primitive.M) ([]interface{}, error) {
+	if filter == nil {
+		filter = bson.M{}
+	}
+	collection := GetCollection(x.Struct2DbName(*new(T)))
+	return collection.Distinct(context.Background(), fieldName, filter)
+}
+
 // 分页
 func (x *DB[T]) Paging(filter bson.M, index, limit, desc int64) (*Page, error) {
 	page := Page{}
