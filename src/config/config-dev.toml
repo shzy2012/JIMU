@@ -8,13 +8,12 @@ read_timeout = 60
 write_timeout = 60
 
 
-# 数据库配置 #
+# MongoDB #
 [mongodb]
 uri = "mongodb://localhost:27017"
 username = "name"
 password = "passwd"
 database = "db_xxx"
-
 
 # mysql #
 [mysql]
@@ -22,6 +21,13 @@ username = "root"
 password = "passwd"
 database = "db_xxx"
 endpoint = "127.0.0.1:3306"
+
+# postgres #
+[postgres]
+username = "postgres"
+password = "passwd"
+database = "db_xxx"
+endpoint = "127.0.0.1:5432"
 
 # ES #
 [elastic]

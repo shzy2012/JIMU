@@ -16,11 +16,21 @@ import (
 
 const timeout = 30 * time.Second
 
-// mongodb client
-var mongoClient *mongo.Client
-var mux sync.Mutex
+var (
+	mux sync.Mutex
 
-func init() {
+	// mongodb client
+	mongoClient *mongo.Client
+
+	// mongodb Collection
+	mongoDB *mongo.Database
+)
+
+func MongoClient() *mongo.Client {
+
+	if mongoClient != nil {
+		return mongoClient
+	}
 
 	var err error
 	//初始化 MongoDB
@@ -50,19 +60,16 @@ func init() {
 	} else {
 		log.Fatalf("[mongo]=>int fail. %s\n", err.Error())
 	}
-}
 
-// Mongo Collection
-var (
-	mongoDB *mongo.Database
-)
+	return mongoClient
+}
 
 // GetCollection 获取 Collection
 func GetCollection(name string) *mongo.Collection {
 	mux.Lock()
 	if mongoDB == nil {
 		//初始化链接数据库
-		mongoDB = mongoClient.Database(config.MongoDB.Database)
+		mongoDB = MongoClient().Database(config.MongoDB.Database)
 	}
 	defer mux.Unlock()
 	return mongoDB.Collection(name)

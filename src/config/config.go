@@ -17,6 +17,14 @@ type MySQLCfg struct {
 	Password string `toml:"password"`
 }
 
+// Postgres
+type PostgresCfg struct {
+	Endpoint string `toml:"endpoint"`
+	Database string `toml:"database"`
+	Username string `toml:"username"`
+	Password string `toml:"password"`
+}
+
 // MongoDB
 type MongoDBCfg struct {
 	URI      string `toml:"uri"`
@@ -50,12 +58,13 @@ type ServerCfg struct {
 
 // 全局配置文件
 type Config struct {
-	Server  ServerCfg  `toml:"server"`
-	MongoDB MongoDBCfg `toml:"mongodb"`
-	MySQL   MySQLCfg   `toml:"mysql"`
-	Elastic ESCfg      `toml:"elastic"`
-	API     APICfg     `toml:"api"`
-	File    FileCfg    `toml:"file"`
+	Server   ServerCfg   `toml:"server"`
+	MongoDB  MongoDBCfg  `toml:"mongodb"`
+	MySQL    MySQLCfg    `toml:"mysql"`
+	Postgres PostgresCfg `toml:"postgres"`
+	Elastic  ESCfg       `toml:"elastic"`
+	API      APICfg      `toml:"api"`
+	File     FileCfg     `toml:"file"`
 }
 
 // NewConfig 初始化配置文件
@@ -69,11 +78,13 @@ func NewConfig(path string) *Config {
 }
 
 var (
-	Server  ServerCfg
-	MongoDB MongoDBCfg
-	ES      ESCfg
-	API     APICfg
-	File    FileCfg
+	Server   ServerCfg
+	MongoDB  MongoDBCfg
+	ES       ESCfg
+	MySQL    MySQLCfg
+	Postgres PostgresCfg
+	API      APICfg
+	File     FileCfg
 )
 
 func init() {
@@ -111,6 +122,8 @@ func init() {
 
 	Server = cfg.Server
 	MongoDB = cfg.MongoDB
+	MySQL = cfg.MySQL
+	Postgres = cfg.Postgres
 	ES = cfg.Elastic
 	API = cfg.API
 	File = cfg.File

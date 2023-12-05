@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"jimu/src/db"
 	"jimu/src/service"
 	"os"
 	"os/signal"
@@ -12,7 +13,7 @@ import (
 )
 
 func init() {
-	// db.Init()
+	db.Init()
 }
 func main() {
 
