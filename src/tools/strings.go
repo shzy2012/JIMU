@@ -49,6 +49,17 @@ func GetRandomString(length uint64) string {
 	return string(result)
 }
 
+// 获取随机数字
+func GetRandomNumber(length uint64) string {
+	str := "123456789"
+	bytes := []byte(str)
+	result := []byte{}
+	for i := uint64(0); i < length; i++ {
+		result = append(result, bytes[r.Intn(int(len(bytes)))])
+	}
+	return string(result)
+}
+
 // 返回包含引号("")的字符串
 func Join(a []string, sep string) string {
 	switch len(a) {
