@@ -1,6 +1,7 @@
 package tools
 
 import (
+	"encoding/json"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -97,4 +98,9 @@ func IsChinesePhone(phone string) bool {
 	}
 
 	return false
+}
+
+func ToBytes(t interface{}) []byte {
+	bytes, _ := json.Marshal(t)
+	return bytes
 }

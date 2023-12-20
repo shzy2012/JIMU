@@ -172,6 +172,7 @@ func IsEmpty(str string) bool {
 	return strings.TrimSpace(str) == ""
 }
 
+// URL Join
 func JoinURL(base string, paths ...string) string {
 	u, _ := url.Parse(base)
 	u.Path = path.Join(u.Path, path.Join(paths...))
@@ -188,6 +189,7 @@ func SubString(str string, f, e int) string {
 	return string([]rune(str)[f:e])
 }
 
+// slice 去重
 func Unique(slice []string) []string {
 	keys := make(map[string]bool)
 	list := []string{}
@@ -198,4 +200,12 @@ func Unique(slice []string) []string {
 		}
 	}
 	return list
+}
+
+// 字符串首字母大写
+func UpperA(s string) string {
+	if s == "" {
+		return ""
+	}
+	return strings.ToUpper(s[:1]) + s[1:]
 }
