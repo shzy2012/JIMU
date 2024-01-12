@@ -104,3 +104,12 @@ func ToBytes(t interface{}) []byte {
 	bytes, _ := json.Marshal(t)
 	return bytes
 }
+
+// 手机手机号 136****1389
+func HideMiddlePhone(phoneNumber string) string {
+	if len(phoneNumber) != 11 {
+		return "Invalid phone number"
+	}
+	// 隐藏中间6位
+	return phoneNumber[:3] + "****" + phoneNumber[7:]
+}
