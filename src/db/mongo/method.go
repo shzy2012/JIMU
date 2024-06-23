@@ -28,10 +28,14 @@ func (x *DB[T]) Find(id primitive.ObjectID) (T, error) {
 }
 
 // 自定义过滤条件
-func (x *DB[T]) Filter(filter primitive.M) (T, error) {
+func (x *DB[T]) Filter(filter primitive.M, desc ...int /*Wrapper function with default value*/) (T, error) {
 	model := new(T)
 	if filter == nil {
 		filter = bson.M{}
+	}
+	option := options.FindOne()
+	if len(desc) > 0 {
+		option.SetSort(bson.M{"_id": desc[0]})
 	}
 	collection := GetCollection(x.Struct2DbName(*model))
 	err := collection.FindOne(context.Background(), filter /*不能为nil*/).Decode(model)
@@ -192,7 +196,9 @@ func (x *DB[T]) Distinct(fieldName string, filter primitive.M) ([]interface{}, e
 
 // 分页
 func (x *DB[T]) Paging(filter bson.M, index, limit, desc int64) (*Page, error) {
-	page := Page{}
+	page := Page{
+		Data: &[]T{},
+	}
 	if filter == nil {
 		filter = bson.M{}
 	}

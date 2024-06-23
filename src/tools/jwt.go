@@ -21,12 +21,11 @@ type Claims struct {
 
 // GenerateToken generate tokens used for auth
 func GenerateToken(who string) (string, error) {
-	expired := time.Now().Add(12 * time.Hour)
 	claims := Claims{
 		MD5(who),
 		jwt.StandardClaims{
 			Subject:   "4login",                                           //主题
-			ExpiresAt: expired.Unix(),                                     //过期时间
+			ExpiresAt: time.Now().Add(time.Hour * 24 * 5).Unix(),          //过期时间
 			Issuer:    fmt.Sprintf("issuer_%s", time.Now().Format(Short)), //签发人
 		},
 	}

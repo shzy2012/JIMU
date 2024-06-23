@@ -1,8 +1,10 @@
 package tools
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"regexp"
 	"strconv"
 	"strings"
@@ -103,6 +105,17 @@ func IsChinesePhone(phone string) bool {
 func ToBytes(t interface{}) []byte {
 	bytes, _ := json.Marshal(t)
 	return bytes
+}
+
+// 禁用Unicode转义
+func ToBytes2(t interface{}) []byte {
+	buf := &bytes.Buffer{}
+	encoder := json.NewEncoder(buf)
+	encoder.SetEscapeHTML(false)
+	if err := encoder.Encode(t); err != nil {
+		log.Printf("%s\n", err.Error())
+	}
+	return buf.Bytes()
 }
 
 // 手机手机号 136****1389
