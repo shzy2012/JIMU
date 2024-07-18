@@ -236,7 +236,7 @@ func (x *DB[T]) CreateIndex(field string, sort int /*1 自然排序(默认方式
 
 // 将struct的名称转化为数据库表的名称
 func (x *DB[T]) Struct2DbName(m T) string {
-	return strings.ToLower(fmt.Sprintf("%T", m))
+	return strings.ToLower(strings.ReplaceAll(fmt.Sprintf("%T", m), ".", "_"))
 }
 
 // 分页
