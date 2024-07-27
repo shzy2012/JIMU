@@ -25,6 +25,16 @@ import (
 	"fmt"
 )
 
+func BytesToSize(bytes int64) string {
+	sizes := []string{"Bytes", "KB", "MB", "GB", "TB"}
+	var i int
+	var val float64 = float64(bytes)
+	for i = 0; i < len(sizes) && val >= 1024; i++ {
+		val /= 1024
+	}
+	return fmt.Sprintf("%.2f %s", val, sizes[i])
+}
+
 func ByteCountSI(b int64) string {
 	const unit = 1000
 	if b < unit {
