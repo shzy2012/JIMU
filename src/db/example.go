@@ -21,9 +21,16 @@ func NewExample() *Example {
 	return &Example{}
 }
 
-/*
-func init() {
+func InitExampleIndex() {
 	// 创建索引
-	NewExample().CreateIndex("name", 1)
+	indexNames := []string{"name", "create_at"}
+	for i := 0; i < len(indexNames); i++ {
+		indexName := indexNames[i]
+		exist, _ := NewExample().IndexExists(indexName)
+		if exist {
+			continue
+		}
+
+		NewExample().IndexCreate(indexName, 1, false)
+	}
 }
-*/

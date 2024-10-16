@@ -220,18 +220,42 @@ func (x *DB[T]) Paging(filter bson.M, index, limit, desc int64) (*Page, error) {
 
 // 创建索引
 // https://kb.objectrocket.com/mongo-db/how-to-create-an-index-using-the-golang-driver-for-mongodb-455
-func (x *DB[T]) CreateIndex(field string, sort int /*1 自然排序(默认方式) || -1 倒序*/) error {
+func (x *DB[T]) IndexCreate(field string, sort int /*1 自然排序(默认方式) || -1 倒序*/, unique bool) error {
 	collection := GetCollection(x.Struct2DbName(*new(T)))
 	log.Printf("index: %s->%s\n", collection.Name(), field)
 	// db.members.createIndex( { "SOME_FIELD": 1 }, { unique: true } )
 	mod := mongo.IndexModel{
 		Keys: bson.M{
 			field: sort, // 1 自然排序(默认方式) || -1 倒序
-		}, Options: options.Index().SetUnique(false),
+		}, Options: options.Index().SetUnique(unique),
 	}
 
 	_, err := collection.Indexes().CreateOne(context.Background(), mod)
 	return err
+}
+
+// 检查指定索引是否存在
+func (x *DB[T]) IndexExists(indexName string) (bool, error) {
+	// 获取当前集合的索引列表
+	collection := GetCollection(x.Struct2DbName(*new(T)))
+	cursor, err := collection.Indexes().List(context.TODO())
+	if err != nil {
+		return false, err
+	}
+	defer cursor.Close(context.TODO())
+
+	// 遍历索引列表
+	for cursor.Next(context.TODO()) {
+		var index bson.M
+		if err := cursor.Decode(&index); err != nil {
+			return false, err
+		}
+		// 检查索引的名称是否匹配
+		if index["name"] == indexName {
+			return true, nil
+		}
+	}
+	return false, nil
 }
 
 // 将struct的名称转化为数据库表的名称
