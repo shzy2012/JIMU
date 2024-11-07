@@ -218,6 +218,31 @@ func (x *DB[T]) Paging(filter bson.M, index, limit, desc int64) (*Page, error) {
 	return &page, err
 }
 
+// 分页:支持自定义排序
+func (x *DB[T]) PagingOrderBy(filter, orderby primitive.M, index, limit int64) (Page, error) {
+
+	page := Page{
+		Data: &[]T{},
+	}
+	if filter == nil {
+		filter = bson.M{}
+	}
+
+	data, err := x.ListOrderBy(filter, orderby, index, limit)
+	if err != nil {
+		return page, nil
+	}
+	total, err := x.Count(filter)
+	if err != nil {
+		return page, nil
+	}
+
+	page.Data = data
+	page.Total = total
+
+	return page, err
+}
+
 // 创建索引
 // https://kb.objectrocket.com/mongo-db/how-to-create-an-index-using-the-golang-driver-for-mongodb-455
 func (x *DB[T]) IndexCreate(field string, sort int /*1 自然排序(默认方式) || -1 倒序*/, unique bool) error {
