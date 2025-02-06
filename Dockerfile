@@ -1,4 +1,4 @@
-FROM golang:1.18 as builder
+FROM golang:1.23 as builder
 WORKDIR /workplace/
 COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build  -v -mod=vendor -o app src/main.go
