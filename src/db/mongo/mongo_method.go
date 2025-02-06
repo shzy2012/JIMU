@@ -16,30 +16,70 @@ import (
 var PageLimit int64 = 30
 
 type DB[T any] struct {
+	table string
 }
 
 // 根据ID查找
 func (x *DB[T]) Find(id primitive.ObjectID) (T, error) {
 	model := new(T)
 	filter := bson.M{"_id": id}
-	collection := GetCollection(x.Struct2DbName(*model))
+	collection := GetCollection(x.tableName())
 	err := collection.FindOne(context.Background(), filter).Decode(model)
 	return *model, err
 }
 
 // 自定义过滤条件
-func (x *DB[T]) Filter(filter primitive.M, desc ...int /*Wrapper function with default value*/) (T, error) {
+func (x *DB[T]) Filter(filter primitive.M, params ...int) (T, error) {
 	model := new(T)
 	if filter == nil {
 		filter = bson.M{}
 	}
+
 	option := options.FindOne()
-	if len(desc) > 0 {
-		option.SetSort(bson.M{"_id": desc[0]})
+	if len(params) > 0 {
+		option.SetSort(bson.M{"_id": params[0]})
 	}
-	collection := GetCollection(x.Struct2DbName(*model))
-	err := collection.FindOne(context.Background(), filter /*不能为nil*/).Decode(model)
+
+	collection := GetCollection(x.tableName())
+	err := collection.FindOne(context.Background(), filter /*不能为nil*/, option).Decode(model)
 	return *model, err
+}
+
+// 新增1条数据
+func (x *DB[T]) Add(data T) (primitive.ObjectID, error) {
+	collection := GetCollection(x.tableName())
+	res, err := collection.InsertOne(context.Background(), data)
+	if err != nil {
+		return primitive.NilObjectID, err
+	}
+	return res.InsertedID.(primitive.ObjectID), nil
+}
+
+// 更新1条记录
+func (x *DB[T]) Update(id primitive.ObjectID, data T) error {
+
+	collection := GetCollection(x.tableName())
+	filter := bson.M{"_id": id}
+	update := bson.M{
+		"$set": data,
+	}
+	_, err := collection.UpdateOne(context.Background(), filter, update)
+	return err
+}
+
+// 删除一条记录
+func (x *DB[T]) Del(id primitive.ObjectID) error {
+	filter := bson.M{"_id": id}
+	collection := GetCollection(x.tableName())
+	_, err := collection.DeleteOne(context.Background(), filter)
+	return err
+}
+
+// 删除多条记录
+func (x *DB[T]) DelMany(filter primitive.M) error {
+	collection := GetCollection(x.tableName())
+	_, err := collection.DeleteMany(context.Background(), filter)
+	return err
 }
 
 func (x *DB[T]) Exist(filter primitive.M) bool {
@@ -53,43 +93,6 @@ func (x *DB[T]) Exist(filter primitive.M) bool {
 	return c > 0
 }
 
-// 新增1条数据
-func (x *DB[T]) Add(data T) (primitive.ObjectID, error) {
-	collection := GetCollection(x.Struct2DbName(data))
-	res, err := collection.InsertOne(context.Background(), data)
-	if err != nil {
-		return primitive.NilObjectID, err
-	}
-	return res.InsertedID.(primitive.ObjectID), nil
-}
-
-// 更新1条记录
-func (x *DB[T]) Update(id primitive.ObjectID, data T) error {
-
-	collection := GetCollection(x.Struct2DbName(data))
-	filter := bson.M{"_id": id}
-	update := bson.M{
-		"$set": data,
-	}
-	_, err := collection.UpdateOne(context.Background(), filter, update)
-	return err
-}
-
-// 删除一条记录
-func (x *DB[T]) Del(id primitive.ObjectID) error {
-	filter := bson.M{"_id": id}
-	collection := GetCollection(x.Struct2DbName(*new(T)))
-	_, err := collection.DeleteOne(context.Background(), filter)
-	return err
-}
-
-// 删除多条记录
-func (x *DB[T]) DelMany(filter primitive.M) error {
-	collection := GetCollection(x.Struct2DbName(*new(T)))
-	_, err := collection.DeleteMany(context.Background(), filter)
-	return err
-}
-
 /*
 	获取列表
 
@@ -99,7 +102,7 @@ limit:分页大小
 desc:排序方式 1:正序,-1:倒序
 */
 func (x *DB[T]) List(filter primitive.M, index, limit, desc int64) (*[]T, error) {
-	collection := GetCollection(x.Struct2DbName(*new(T)))
+	collection := GetCollection(x.tableName())
 	if filter == nil {
 		filter = bson.M{}
 	}
@@ -141,8 +144,8 @@ index:分页索引
 limit:分页大小
 desc:排序方式 1:正序,-1:倒序
 */
-func (x *DB[T]) ListOrderBy(filter primitive.M, orderby primitive.M, index, limit int64) (*[]T, error) {
-	collection := GetCollection(x.Struct2DbName(*new(T)))
+func (x *DB[T]) ListBy(filter, orderby primitive.M, index, limit int64) (*[]T, error) {
+	collection := GetCollection(x.tableName())
 	if filter == nil {
 		filter = bson.M{}
 	}
@@ -181,7 +184,7 @@ func (x *DB[T]) Count(filter primitive.M) (int64, error) {
 	if filter == nil {
 		filter = bson.M{}
 	}
-	collection := GetCollection(x.Struct2DbName(*new(T)))
+	collection := GetCollection(x.tableName())
 	return collection.CountDocuments(context.Background(), filter)
 }
 
@@ -190,12 +193,13 @@ func (x *DB[T]) Distinct(fieldName string, filter primitive.M) ([]interface{}, e
 	if filter == nil {
 		filter = bson.M{}
 	}
-	collection := GetCollection(x.Struct2DbName(*new(T)))
+	collection := GetCollection(x.tableName())
 	return collection.Distinct(context.Background(), fieldName, filter)
 }
 
 // 分页
-func (x *DB[T]) Paging(filter bson.M, index, limit, desc int64) (*Page, error) {
+func (x *DB[T]) Paging(filter bson.M, index, limit, desc int64) (Page, error) {
+
 	page := Page{
 		Data: &[]T{},
 	}
@@ -205,21 +209,20 @@ func (x *DB[T]) Paging(filter bson.M, index, limit, desc int64) (*Page, error) {
 
 	data, err := x.List(filter, index, limit, desc)
 	if err != nil {
-		return &page, nil
+		return page, nil
 	}
 	total, err := x.Count(filter)
 	if err != nil {
-		return &page, nil
+		return page, nil
 	}
 
 	page.Data = data
 	page.Total = total
 
-	return &page, err
+	return page, err
 }
 
-// 分页:支持自定义排序
-func (x *DB[T]) PagingOrderBy(filter, orderby primitive.M, index, limit int64) (Page, error) {
+func (x *DB[T]) PagingBy(filter, orderby primitive.M, index, limit int64) (Page, error) {
 
 	page := Page{
 		Data: &[]T{},
@@ -228,7 +231,7 @@ func (x *DB[T]) PagingOrderBy(filter, orderby primitive.M, index, limit int64) (
 		filter = bson.M{}
 	}
 
-	data, err := x.ListOrderBy(filter, orderby, index, limit)
+	data, err := x.ListBy(filter, orderby, index, limit)
 	if err != nil {
 		return page, nil
 	}
@@ -246,7 +249,7 @@ func (x *DB[T]) PagingOrderBy(filter, orderby primitive.M, index, limit int64) (
 // 创建索引
 // https://kb.objectrocket.com/mongo-db/how-to-create-an-index-using-the-golang-driver-for-mongodb-455
 func (x *DB[T]) IndexCreate(field string, sort int /*1 自然排序(默认方式) || -1 倒序*/, unique bool) error {
-	collection := GetCollection(x.Struct2DbName(*new(T)))
+	collection := GetCollection(x.tableName())
 	log.Printf("index: %s->%s\n", collection.Name(), field)
 	// db.members.createIndex( { "SOME_FIELD": 1 }, { unique: true } )
 	mod := mongo.IndexModel{
@@ -262,7 +265,7 @@ func (x *DB[T]) IndexCreate(field string, sort int /*1 自然排序(默认方式
 // 检查指定索引是否存在
 func (x *DB[T]) IndexExists(indexName string) (bool, error) {
 	// 获取当前集合的索引列表
-	collection := GetCollection(x.Struct2DbName(*new(T)))
+	collection := GetCollection(x.tableName())
 	cursor, err := collection.Indexes().List(context.TODO())
 	if err != nil {
 		return false, err
@@ -284,8 +287,11 @@ func (x *DB[T]) IndexExists(indexName string) (bool, error) {
 }
 
 // 将struct的名称转化为数据库表的名称
-func (x *DB[T]) Struct2DbName(m T) string {
-	return strings.ToLower(strings.ReplaceAll(fmt.Sprintf("%T", m), ".", "_"))
+func (x *DB[T]) tableName() string {
+	if x.table == "" {
+		x.table = strings.ToLower(fmt.Sprintf("%T", *new(T)))
+	}
+	return x.table
 }
 
 // 分页

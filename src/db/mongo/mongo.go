@@ -67,11 +67,11 @@ func MongoClient() *mongo.Client {
 // GetCollection 获取 Collection
 func GetCollection(name string) *mongo.Collection {
 	mux.Lock()
+	defer mux.Unlock()
 	if mongoDB == nil {
 		//初始化链接数据库
 		mongoDB = MongoClient().Database(config.MongoDB.Database)
 	}
-	defer mux.Unlock()
 	return mongoDB.Collection(name)
 }
 
