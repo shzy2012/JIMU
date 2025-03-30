@@ -49,6 +49,16 @@ func (x *DB[T]) Filter(filter primitive.M, params ...int) (T, error) {
 	return *model, err
 }
 
+// First 获取集合中的第一条记录
+func (x *DB[T]) First() (T, error) {
+	return x.Filter(nil, 1) // 使用 1 表示正序，获取第一条
+}
+
+// Last 获取集合中的最后一条记录
+func (x *DB[T]) Last() (T, error) {
+	return x.Filter(nil, -1) // 使用 -1 表示倒序，获取最后一条
+}
+
 // 新增1条数据
 func (x *DB[T]) Add(data T) (primitive.ObjectID, error) {
 	collection := GetCollection(x.tableName())
