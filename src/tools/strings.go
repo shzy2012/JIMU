@@ -5,6 +5,7 @@ import (
 	"math/rand"
 	"net/url"
 	"path"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -212,4 +213,26 @@ func UpperA(s string) string {
 		return ""
 	}
 	return strings.ToUpper(s[:1]) + s[1:]
+}
+
+// 处理大模型输出json不规则的问题
+func FixLLMOutputJSON(json string) string {
+	json = strings.ReplaceAll(json, "，", ",")
+	json = strings.ReplaceAll(json, `\n`, ``)
+	json = strings.ReplaceAll(json, `\`, ``)
+	json = strings.ReplaceAll(json, `"NULL"`, `""`)
+	json = strings.ReplaceAll(json, `NULL`, `""`)
+	json = strings.ReplaceAll(json, "```json", ``)
+	json = strings.ReplaceAll(json, "```", ``)
+
+	return fixJSONKeys(json)
+}
+
+// 处理json key缺失引号的问题
+func fixJSONKeys(jsonString string) string {
+	// 匹配未加引号的键，包括中文和其他字符
+	re := regexp.MustCompile(`(?m)([^"\s\{\}:,\[\]]+)\s*:`)
+	// 为匹配到的键添加引号
+	fixedJSON := re.ReplaceAllString(jsonString, `"$1":`)
+	return fixedJSON
 }
