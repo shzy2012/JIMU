@@ -88,6 +88,55 @@ func GetRFC3339(v string) string {
 	return t.Format("2006-01-02T15:04:05Z07:00")
 }
 
+func GetDate(v string) (time.Time, error) {
+	if v == "" {
+		return time.Time{}, fmt.Errorf("empty date string")
+	}
+
+	// Try common date formats
+	formats := []string{
+		"2006-01-02",
+		"2006/01/02",
+		"02-01-2006",
+		"02/01/2006",
+		"2006.01.02",
+		"02.01.2006",
+	}
+
+	for _, format := range formats {
+		t, err := time.Parse(format, v)
+		if err == nil {
+			return t.Local(), nil
+		}
+	}
+
+	return time.Time{}, fmt.Errorf("invalid date format: %s", v)
+}
+
+// 将普通时间格式转化为 time.Time
+func GetDatetime(v string) (time.Time, error) {
+	if v == "" {
+		return time.Time{}, fmt.Errorf("empty date string")
+	}
+
+	// Try parsing with time component
+	formats := []string{
+		"2006-01-02 15:04:05",
+		"2006/01/02 15:04:05",
+		"02-01-2006 15:04:05",
+		"02/01/2006 15:04:05",
+	}
+
+	for _, format := range formats {
+		t, err := time.Parse(format, v)
+		if err == nil {
+			return t.Local(), nil
+		}
+	}
+
+	return time.Time{}, fmt.Errorf("invalid date format: %s", v)
+}
+
 // https://juejin.cn/post/6844903648045039624
 func IsChinesePhone(phone string) bool {
 	reg1 := regexp.MustCompile(`^1(?:3[0-9]|4[5-9]|5[0-9]|6[12456]|7[0-8]|8[0-9]|9[0-9])[0-9]{8}$`)
