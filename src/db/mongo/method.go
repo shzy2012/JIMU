@@ -260,6 +260,24 @@ func (x *DB[T]) PagingBy(filter, orderby primitive.M, index, limit int64) (Page,
 	return page, err
 }
 
+// 指定删除某个字段
+func (x *DB[T]) FieldDrop(filter bson.M, field string) error {
+	collection := GetCollection(x.tableName())
+	if filter == nil {
+		filter = bson.M{}
+	}
+
+	//  更新多个字段
+	update := bson.M{
+		"$unset": bson.M{
+			field: "",
+		},
+	}
+
+	_, err := collection.UpdateMany(context.Background(), filter, update)
+	return err
+}
+
 // 创建索引
 // https://kb.objectrocket.com/mongo-db/how-to-create-an-index-using-the-golang-driver-for-mongodb-455
 func (x *DB[T]) IndexCreate(field string, sort int /*1 自然排序(默认方式) || -1 倒序*/, unique bool) error {
@@ -270,6 +288,25 @@ func (x *DB[T]) IndexCreate(field string, sort int /*1 自然排序(默认方式
 		Keys: bson.M{
 			field: sort, // 1 自然排序(默认方式) || -1 倒序
 		}, Options: options.Index().SetUnique(unique),
+	}
+
+	_, err := collection.Indexes().CreateOne(context.Background(), mod)
+	return err
+}
+
+// 创建带过期时间的索引
+// field: 索引字段
+// sort: 排序方式 1:正序,-1:倒序
+// expireAfterSeconds: 过期时间(秒)
+func (x *DB[T]) IndexCreateWithExpiry(field string, sort int, expireAfterSeconds int32) error {
+	collection := GetCollection(x.tableName())
+	log.Printf("index with expiry: %s->%s, expireAfterSeconds: %d\n", collection.Name(), field, expireAfterSeconds)
+
+	mod := mongo.IndexModel{
+		Keys: bson.M{
+			field: sort,
+		},
+		Options: options.Index().SetExpireAfterSeconds(expireAfterSeconds),
 	}
 
 	_, err := collection.Indexes().CreateOne(context.Background(), mod)
