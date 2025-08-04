@@ -20,6 +20,11 @@ func Serve(ctx context.Context, port int) {
 	srv = &http.Server{
 		Addr:    addr,
 		Handler: InitRouter(),
+		// 避免大量连接
+		ReadTimeout:       30 * time.Second,
+		WriteTimeout:      30 * time.Second,
+		IdleTimeout:       120 * time.Second,
+		ReadHeaderTimeout: 10 * time.Second,
 	}
 
 	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
