@@ -22,6 +22,13 @@ password = "passwd"
 database = "db_xxx"
 endpoint = "127.0.0.1:3306"
 
+# clickhouse #
+[clickhouse]
+endpoints = ["tcp://127.0.0.1:9000"]
+username = "default"
+password = "123456"
+database = "db_quant"  
+
 # postgres #
 [postgres]
 username = "postgres"

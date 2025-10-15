@@ -115,7 +115,7 @@ index:分页索引
 limit:分页大小
 desc:排序方式 1:正序,-1:倒序
 */
-func (x *DB[T]) List(filter primitive.M, index, limit, desc int64) (*[]T, error) {
+func (x *DB[T]) List(filter primitive.M, index, limit, desc int64) ([]T, error) {
 	collection := GetCollection(x.tableName())
 	if filter == nil {
 		filter = bson.M{}
@@ -129,7 +129,7 @@ func (x *DB[T]) List(filter primitive.M, index, limit, desc int64) (*[]T, error)
 	}
 	cursor, err := collection.Find(ctx, filter, options)
 	if err != nil {
-		return &results, err
+		return results, err
 	}
 
 	defer cursor.Close(ctx)
@@ -137,16 +137,16 @@ func (x *DB[T]) List(filter primitive.M, index, limit, desc int64) (*[]T, error)
 		result := new(T)
 		err := cursor.Decode(result)
 		if err != nil {
-			return &results, err
+			return results, err
 		}
 		results = append(results, *result)
 	}
 
 	if err := cursor.Err(); err != nil {
-		return &results, err
+		return results, err
 	}
 
-	return &results, err
+	return results, err
 }
 
 /*
@@ -158,7 +158,7 @@ index:分页索引
 limit:分页大小
 desc:排序方式 1:正序,-1:倒序
 */
-func (x *DB[T]) ListBy(filter, orderby primitive.M, index, limit int64) (*[]T, error) {
+func (x *DB[T]) ListBy(filter, orderby primitive.M, index, limit int64) ([]T, error) {
 	collection := GetCollection(x.tableName())
 	if filter == nil {
 		filter = bson.M{}
@@ -173,7 +173,7 @@ func (x *DB[T]) ListBy(filter, orderby primitive.M, index, limit int64) (*[]T, e
 	options := options.Find().SetSort(orderby).SetLimit(limit).SetSkip(limit * index)
 	cursor, err := collection.Find(ctx, filter, options)
 	if err != nil {
-		return &results, err
+		return results, err
 	}
 
 	defer cursor.Close(ctx)
@@ -181,16 +181,16 @@ func (x *DB[T]) ListBy(filter, orderby primitive.M, index, limit int64) (*[]T, e
 		result := new(T)
 		err := cursor.Decode(result)
 		if err != nil {
-			return &results, err
+			return results, err
 		}
 		results = append(results, *result)
 	}
 
 	if err := cursor.Err(); err != nil {
-		return &results, err
+		return results, err
 	}
 
-	return &results, err
+	return results, err
 }
 
 // 文档数量
@@ -215,7 +215,7 @@ func (x *DB[T]) Distinct(fieldName string, filter primitive.M) ([]interface{}, e
 func (x *DB[T]) Paging(filter bson.M, index, limit, desc int64) (Page, error) {
 
 	page := Page{
-		Data: &[]T{},
+		Data: []T{},
 	}
 	if filter == nil {
 		filter = bson.M{}
@@ -239,7 +239,7 @@ func (x *DB[T]) Paging(filter bson.M, index, limit, desc int64) (Page, error) {
 func (x *DB[T]) PagingBy(filter, orderby primitive.M, index, limit int64) (Page, error) {
 
 	page := Page{
-		Data: &[]T{},
+		Data: []T{},
 	}
 	if filter == nil {
 		filter = bson.M{}

@@ -17,6 +17,14 @@ type MySQLCfg struct {
 	Password string `toml:"password"`
 }
 
+// clickhouse
+type ClickhouseCfg struct {
+	Endpoints []string `toml:"endpoints"`
+	Username  string   `toml:"username"`
+	Password  string   `toml:"password"`
+	Database  string   `toml:"database"`
+}
+
 // Postgres
 type PostgresCfg struct {
 	Endpoint string `toml:"endpoint"`
@@ -58,13 +66,14 @@ type ServerCfg struct {
 
 // 全局配置文件
 type Config struct {
-	Server   ServerCfg   `toml:"server"`
-	MongoDB  MongoDBCfg  `toml:"mongodb"`
-	MySQL    MySQLCfg    `toml:"mysql"`
-	Postgres PostgresCfg `toml:"postgres"`
-	Elastic  ESCfg       `toml:"elastic"`
-	API      APICfg      `toml:"api"`
-	File     FileCfg     `toml:"file"`
+	Server     ServerCfg     `toml:"server"`
+	MongoDB    MongoDBCfg    `toml:"mongodb"`
+	MySQL      MySQLCfg      `toml:"mysql"`
+	Postgres   PostgresCfg   `toml:"postgres"`
+	Elastic    ESCfg         `toml:"elastic"`
+	API        APICfg        `toml:"api"`
+	File       FileCfg       `toml:"file"`
+	Clickhouse ClickhouseCfg `toml:"clickhouse"`
 }
 
 // NewConfig 初始化配置文件
@@ -78,13 +87,14 @@ func NewConfig(path string) *Config {
 }
 
 var (
-	Server   ServerCfg
-	MongoDB  MongoDBCfg
-	ES       ESCfg
-	MySQL    MySQLCfg
-	Postgres PostgresCfg
-	API      APICfg
-	File     FileCfg
+	Server     ServerCfg
+	MongoDB    MongoDBCfg
+	ES         ESCfg
+	MySQL      MySQLCfg
+	Postgres   PostgresCfg
+	API        APICfg
+	File       FileCfg
+	Clickhouse ClickhouseCfg
 )
 
 func init() {
@@ -123,6 +133,7 @@ func init() {
 	Server = cfg.Server
 	MongoDB = cfg.MongoDB
 	MySQL = cfg.MySQL
+	Clickhouse = cfg.Clickhouse
 	Postgres = cfg.Postgres
 	ES = cfg.Elastic
 	API = cfg.API
