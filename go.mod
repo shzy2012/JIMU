@@ -10,7 +10,7 @@ require (
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-contrib/static v1.1.3
 	github.com/gin-gonic/gin v1.10.0
-	github.com/shzy2012/common v1.10.0
+	github.com/shzy2012/common v1.12.4
 	go.mongodb.org/mongo-driver v1.11.6
 )
 
