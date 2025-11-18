@@ -81,6 +81,29 @@ func (x *DB[T]) Update(id primitive.ObjectID, data T) error {
 	return err
 }
 
+// UpdateBy 根据自定义过滤条件更新单条记录
+/*
+filter := bson.M{
+	"_id":       model.ID,
+	"is_delete": bson.M{"$ne": true},
+}
+modified, err := db.NewOrder().UpdateBy(filter, model)
+*/
+func (x *DB[T]) UpdateBy(filter bson.M, data T) (int64, error) {
+	if filter == nil {
+		filter = bson.M{}
+	}
+	collection := GetCollection(x.tableName())
+	update := bson.M{
+		"$set": data,
+	}
+	res, err := collection.UpdateOne(context.Background(), filter, update)
+	if err != nil {
+		return 0, err
+	}
+	return res.ModifiedCount, nil
+}
+
 // 删除一条记录
 func (x *DB[T]) Del(id primitive.ObjectID) error {
 	filter := bson.M{"_id": id}
