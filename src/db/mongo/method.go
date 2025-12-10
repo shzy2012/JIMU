@@ -259,6 +259,68 @@ func (x *DB[T]) Paging(filter bson.M, index, limit, desc int64) (Page, error) {
 	return page, err
 }
 
+/*
+pipeline:聚合管道
+返回:聚合结果
+
+example:
+
+	filter := bson.M{"reply_content": "兜底回复"}
+	pipeline := []bson.M{
+		{"$match": filter},
+		{"$group": bson.M{
+			"_id":   "$belong_to",
+			"count": bson.M{"$sum": 1},
+		}},
+	}
+	results, err := db.NewChatMessage().Aggregate(pipeline)
+	if err != nil {
+		log.Printf("[err]=>%s\n", err.Error())
+	}
+
+	for _, v := range results {
+		fmt.Println(v["_id"], v["count"])
+	}
+
+	fmt.Printf("%s\n", tools.ToBytes(results))
+
+----------------------------------------------------------------
+
+聚合结果处理方式:
+// 方式 1: 定义具体的结构体（类型安全）
+
+	type AggregateResult struct {
+		ID          string  `bson:"_id"`
+		TotalAmount float64 `bson:"total_amount"`
+		Count       int     `bson:"count"`
+		AvgAmount   float64 `bson:"avg_amount"`
+	}
+
+// 方式 2: 使用 bson.M (map[string]interface{}) - 最灵活
+// var results []bson.M
+
+// 方式 3: 使用 bson.D (有序的键值对) - 保持字段顺序
+// var results []bson.D
+
+// 方式 4: 使用 interface{} - 完全动态
+// var results []interface{}
+*/
+func (x *DB[T]) Aggregate(pipeline interface{}) ([]bson.M, error) {
+	collection := GetCollection(x.tableName())
+	ctx := context.Background()
+	cursor, err := collection.Aggregate(ctx, pipeline)
+	if err != nil {
+		return nil, err
+	}
+	defer cursor.Close(ctx)
+	results := []bson.M{}
+	err = cursor.All(ctx, &results)
+	if err != nil {
+		return nil, err
+	}
+	return results, nil
+}
+
 func (x *DB[T]) PagingBy(filter, orderby primitive.M, index, limit int64) (Page, error) {
 
 	page := Page{
