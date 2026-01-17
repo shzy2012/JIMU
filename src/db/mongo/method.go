@@ -69,6 +69,21 @@ func (x *DB[T]) Add(data T) (primitive.ObjectID, error) {
 	return res.InsertedID.(primitive.ObjectID), nil
 }
 
+// 批量插入数据
+func (x *DB[T]) AddBatch(data []T) error {
+	if len(data) == 0 {
+		return nil
+	}
+	collection := GetCollection(x.tableName())
+	// 转换为 []interface{} 类型
+	documents := make([]interface{}, len(data))
+	for i := range data {
+		documents[i] = data[i]
+	}
+	_, err := collection.InsertMany(context.Background(), documents)
+	return err
+}
+
 // 更新1条记录
 func (x *DB[T]) Update(id primitive.ObjectID, data T) error {
 
@@ -259,6 +274,30 @@ func (x *DB[T]) Paging(filter bson.M, index, limit, desc int64) (Page, error) {
 	return page, err
 }
 
+func (x *DB[T]) PagingBy(filter, orderby primitive.M, index, limit int64) (Page, error) {
+
+	page := Page{
+		Data: []T{},
+	}
+	if filter == nil {
+		filter = bson.M{}
+	}
+
+	data, err := x.ListBy(filter, orderby, index, limit)
+	if err != nil {
+		return page, nil
+	}
+	total, err := x.Count(filter)
+	if err != nil {
+		return page, nil
+	}
+
+	page.Data = data
+	page.Total = total
+
+	return page, err
+}
+
 /*
 pipeline:聚合管道
 返回:聚合结果
@@ -321,30 +360,6 @@ func (x *DB[T]) Aggregate(pipeline interface{}) ([]bson.M, error) {
 	return results, nil
 }
 
-func (x *DB[T]) PagingBy(filter, orderby primitive.M, index, limit int64) (Page, error) {
-
-	page := Page{
-		Data: []T{},
-	}
-	if filter == nil {
-		filter = bson.M{}
-	}
-
-	data, err := x.ListBy(filter, orderby, index, limit)
-	if err != nil {
-		return page, nil
-	}
-	total, err := x.Count(filter)
-	if err != nil {
-		return page, nil
-	}
-
-	page.Data = data
-	page.Total = total
-
-	return page, err
-}
-
 // 指定删除某个字段
 func (x *DB[T]) FieldDrop(filter bson.M, field string) error {
 	collection := GetCollection(x.tableName())
@@ -372,7 +387,7 @@ func (x *DB[T]) IndexCreate(field string, sort int /*1 自然排序(默认方式
 	mod := mongo.IndexModel{
 		Keys: bson.M{
 			field: sort, // 1 自然排序(默认方式) || -1 倒序
-		}, Options: options.Index().SetUnique(unique),
+		}, Options: options.Index().SetUnique(unique).SetName(field),
 	}
 
 	_, err := collection.Indexes().CreateOne(context.Background(), mod)

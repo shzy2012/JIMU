@@ -236,3 +236,21 @@ func fixJSONKeys(jsonString string) string {
 	fixedJSON := re.ReplaceAllString(jsonString, `"$1":`)
 	return fixedJSON
 }
+
+// 统计字符数（不是字节数）
+func CountCharacters(s string) int {
+	return len([]rune(s))
+}
+
+// 安全截取字符串,避免中文被拆开导致乱码
+func SafeSubstring(s string, start, length int) string {
+	runes := []rune(s)
+	if start < 0 || start >= len(runes) {
+		return ""
+	}
+	end := start + length
+	if end > len(runes) {
+		end = len(runes)
+	}
+	return string(runes[start:end])
+}
