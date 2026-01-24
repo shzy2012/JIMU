@@ -191,20 +191,20 @@ func (x *DB[T]) List(filter primitive.M, index, limit, desc int64) ([]T, error) 
 	获取列表
 
 filter:过滤条件. eg: bson.M{"name": "zs"}
-orderby:自定义字段排序
-  - 单字段排序: bson.M{"_id": -1} 或 bson.D{{"_id", -1}}
-  - 多字段排序: 必须使用 bson.D 保证顺序，eg: bson.D{{"field1", 1}, {"field2", -1}}
+orderby:自定义字段排序，必须使用 bson.D 类型
+  - 单字段排序: bson.D{{Key: "_id", Value: -1}}
+  - 多字段排序: bson.D{{Key: "field1", Value: 1}, {Key: "field2", Value: -1}}
     注意：MongoDB 多字段排序必须使用 bson.D 而不是 bson.M，因为 map 不保证顺序
 
 index:分页索引
 limit:分页大小
 */
-func (x *DB[T]) ListBy(filter primitive.M, orderby interface{}, index, limit int64) ([]T, error) {
+func (x *DB[T]) ListBy(filter primitive.M, orderby bson.D, index, limit int64) ([]T, error) {
 	collection := GetCollection(x.tableName())
 	if filter == nil {
 		filter = bson.M{}
 	}
-	if orderby == nil {
+	if len(orderby) == 0 {
 		orderby = bson.D{{Key: "_id", Value: -1}}
 	}
 	results := []T{}
@@ -281,15 +281,15 @@ func (x *DB[T]) Paging(filter bson.M, index, limit, desc int64) (Page, error) {
 	分页查询（支持自定义排序）
 
 filter:过滤条件. eg: bson.M{"name": "zs"}
-orderby:自定义字段排序
-  - 单字段排序: bson.M{"_id": -1} 或 bson.D{{"_id", -1}}
-  - 多字段排序: 必须使用 bson.D 保证顺序，eg: bson.D{{"field1", 1}, {"field2", -1}}
+orderby:自定义字段排序，必须使用 bson.D 类型
+  - 单字段排序: bson.D{{Key: "_id", Value: -1}}
+  - 多字段排序: bson.D{{Key: "field1", Value: 1}, {Key: "field2", Value: -1}}
     注意：MongoDB 多字段排序必须使用 bson.D 而不是 bson.M，因为 map 不保证顺序
 
 index:分页索引
 limit:分页大小
 */
-func (x *DB[T]) PagingBy(filter primitive.M, orderby interface{}, index, limit int64) (Page, error) {
+func (x *DB[T]) PagingBy(filter primitive.M, orderby bson.D, index, limit int64) (Page, error) {
 
 	page := Page{
 		Data: []T{},
