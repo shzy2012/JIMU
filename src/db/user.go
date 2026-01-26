@@ -40,7 +40,7 @@ func NewUser() *User {
 }
 
 // 初始化数据
-func initUser() {
+func InitUserDate() {
 	log.Infoln("初始化 user 数据")
 	ids := []string{"admin"}
 	for _, ele := range ids {
@@ -58,4 +58,16 @@ func initUser() {
 	}
 
 	log.Info("user data is ok")
+}
+
+func InitUserIndex() {
+	indexNames := []string{"phone", "passwd", "token"}
+	for i := 0; i < len(indexNames); i++ {
+		indexName := indexNames[i]
+		exist, _ := NewUser().IndexExists(indexName)
+		if exist {
+			continue
+		}
+		NewUser().IndexCreate(indexName, 1, false)
+	}
 }

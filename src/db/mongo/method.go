@@ -399,10 +399,17 @@ func (x *DB[T]) IndexCreate(field string, sort int /*1 自然排序(默认方式
 	collection := GetCollection(x.tableName())
 	log.Printf("index: %s->%s\n", collection.Name(), field)
 	// db.members.createIndex( { "SOME_FIELD": 1 }, { unique: true } )
+	// MongoDB默认索引名称格式: 字段名_排序方向
+	indexName := field
+	if sort == 1 {
+		indexName = field + "_1"
+	} else {
+		indexName = field + "_-1"
+	}
 	mod := mongo.IndexModel{
 		Keys: bson.M{
 			field: sort, // 1 自然排序(默认方式) || -1 倒序
-		}, Options: options.Index().SetUnique(unique).SetName(field),
+		}, Options: options.Index().SetUnique(unique).SetName(indexName),
 	}
 
 	_, err := collection.Indexes().CreateOne(context.Background(), mod)
