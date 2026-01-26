@@ -75,6 +75,11 @@ func GetCollection(name string) *mongo.Collection {
 	return mongoDB.Collection(name)
 }
 
+// New Hex
+func GetHex() string {
+	return primitive.NewObjectID().Hex()
+}
+
 // ID=>Hex
 func FromHex(id string) primitive.ObjectID {
 	ID, err := primitive.ObjectIDFromHex(id)
@@ -84,9 +89,26 @@ func FromHex(id string) primitive.ObjectID {
 	return ID
 }
 
-// New Hex
-func GetHex() string {
-	return primitive.NewObjectID().Hex()
+// IDs=>Hexs
+func FromHexs(ids []string) []primitive.ObjectID {
+	res := make([]primitive.ObjectID, 0)
+	for _, id := range ids {
+		ID, err := primitive.ObjectIDFromHex(id)
+		if err != nil {
+			log.Infof("id=>[%s] is %s\n", id, err.Error())
+			continue
+		}
+		res = append(res, ID)
+	}
+	return res
+}
+
+func ToHexs(ids []primitive.ObjectID) []string {
+	res := make([]string, len(ids))
+	for i, id := range ids {
+		res[i] = id.Hex()
+	}
+	return res
 }
 
 // New Hex
