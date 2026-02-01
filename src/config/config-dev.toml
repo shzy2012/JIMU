@@ -11,9 +11,9 @@ write_timeout = 60
 # MongoDB #
 [mongodb]
 uri = "mongodb://localhost:27017"
-username = "name"
-password = "passwd"
-database = "db_xxx"
+username = "admin"
+password = "X]pCY)g8Hs%9hlss,Y]i"
+database = "db_tolobio"
 
 # mysql #
 [mysql]
@@ -27,7 +27,7 @@ endpoint = "127.0.0.1:3306"
 endpoints = ["tcp://127.0.0.1:9000"]
 username = "default"
 password = "123456"
-database = "db_quant"  
+database = "db_quant"
 
 # postgres #
 [postgres]

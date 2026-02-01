@@ -463,6 +463,8 @@ func (x *DB[T]) IndexExists(indexName string) (bool, error) {
 func (x *DB[T]) tableName() string {
 	if x.table == "" {
 		x.table = strings.ToLower(fmt.Sprintf("%T", *new(T)))
+		// 将点号替换为下划线，例如 db.edgetype -> db_edgetype
+		x.table = strings.ReplaceAll(x.table, ".", "_")
 	}
 	return x.table
 }

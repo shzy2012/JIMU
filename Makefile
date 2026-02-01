@@ -2,7 +2,7 @@ VERSION = latest
 IMAGE = image-name:${VERSION}
 
 run:
-	go run src/main.go -p=8001
+	go run src/main.go -p=8000
 
 build:
 	go build  -v -mod=vendor -o app src/main.go

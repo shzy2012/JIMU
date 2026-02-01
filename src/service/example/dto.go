@@ -1,7 +1,7 @@
 package example
 
 import (
-	"jimu/src/tools"
+	"tolo/src/tools"
 )
 
 type Params struct {

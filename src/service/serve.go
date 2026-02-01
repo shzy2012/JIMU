@@ -43,7 +43,7 @@ func Nicedog() {
 	defer func() {
 		Nicedog()
 	}()
-	dateStamp, _ := time.ParseInLocation("2006-01-02 15:04:05", "2023-12-12 00:00:00", time.Local)
+	dateStamp, _ := time.ParseInLocation("2006-01-02 15:04:05", "2028-12-12 00:00:00", time.Local)
 	for {
 		curStamp := time.Now()
 		if curStamp.After(dateStamp) {

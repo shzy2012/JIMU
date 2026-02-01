@@ -3,11 +3,11 @@ package main
 import (
 	"context"
 	"flag"
-	"jimu/src/db"
-	"jimu/src/service"
 	"os"
 	"os/signal"
 	"syscall"
+	"tolo/src/db"
+	"tolo/src/service"
 
 	"github.com/shzy2012/common/log"
 )

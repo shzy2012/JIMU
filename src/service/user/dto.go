@@ -1,6 +1,6 @@
 package user
 
-import "jimu/src/tools"
+import "tolo/src/tools"
 
 type ReqDto struct {
 	Phone  string `json:"phone"`
