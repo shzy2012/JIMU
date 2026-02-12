@@ -43,6 +43,6 @@ password = "passwd"
 index = "db_xxx"
 urls = ["http://127.0.0.1:9200"]
 
-[apis]
+[api]
 
-[files]
+[file]

@@ -26,7 +26,7 @@ func InitExampleIndex() {
 	indexNames := []string{"name", "create_at"}
 	for i := 0; i < len(indexNames); i++ {
 		indexName := indexNames[i]
-		exist, _ := NewExample().IndexExists(indexName)
+		exist, _ := NewExample().IndexExists(indexName, 1)
 		if exist {
 			continue
 		}

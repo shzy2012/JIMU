@@ -30,3 +30,13 @@ type PageDS struct {
 	Total int64       `json:"total"`
 	Data  interface{} `json:"data"`
 }
+
+type Select struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
+type Select2 struct {
+	Label string `json:"label"`
+	Value string `json:"value"`
+}

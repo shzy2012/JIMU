@@ -119,6 +119,27 @@ func (x *DB[T]) UpdateBy(filter bson.M, data T) (int64, error) {
 	return res.ModifiedCount, nil
 }
 
+// UpdateManyBy 根据自定义过滤条件更新多条记录
+/*
+filter := bson.M{"status": 1}
+data := bson.M{"status": 2}
+modified, err := db.NewUser().UpdateManyBy(filter, data)
+*/
+func (x *DB[T]) UpdateMany(filter bson.M, data T) (int64, error) {
+	if filter == nil {
+		filter = bson.M{}
+	}
+	collection := GetCollection(x.tableName())
+	update := bson.M{
+		"$set": data,
+	}
+	res, err := collection.UpdateMany(context.Background(), filter, update)
+	if err != nil {
+		return 0, err
+	}
+	return res.ModifiedCount, nil
+}
+
 // 删除一条记录
 func (x *DB[T]) Del(id primitive.ObjectID) error {
 	filter := bson.M{"_id": id}
@@ -393,6 +414,16 @@ func (x *DB[T]) FieldDrop(filter bson.M, field string) error {
 	return err
 }
 
+// 统一生成索引名称
+// field: 字段名
+// sort: 排序方式 1:正序,-1:倒序
+func GetIndexName(field string, sort int) string {
+	if sort == 1 {
+		return field + "_1"
+	}
+	return field + "_-1"
+}
+
 // 创建索引
 // https://kb.objectrocket.com/mongo-db/how-to-create-an-index-using-the-golang-driver-for-mongodb-455
 func (x *DB[T]) IndexCreate(field string, sort int /*1 自然排序(默认方式) || -1 倒序*/, unique bool) error {
@@ -400,12 +431,7 @@ func (x *DB[T]) IndexCreate(field string, sort int /*1 自然排序(默认方式
 	log.Printf("index: %s->%s\n", collection.Name(), field)
 	// db.members.createIndex( { "SOME_FIELD": 1 }, { unique: true } )
 	// MongoDB默认索引名称格式: 字段名_排序方向
-	indexName := field
-	if sort == 1 {
-		indexName = field + "_1"
-	} else {
-		indexName = field + "_-1"
-	}
+	indexName := GetIndexName(field, sort)
 	mod := mongo.IndexModel{
 		Keys: bson.M{
 			field: sort, // 1 自然排序(默认方式) || -1 倒序
@@ -435,8 +461,11 @@ func (x *DB[T]) IndexCreateWithExpiry(field string, sort int, expireAfterSeconds
 	return err
 }
 
-// 检查指定索引是否存在
-func (x *DB[T]) IndexExists(indexName string) (bool, error) {
+// 检查指定索引是否存在（通过完整索引名）
+func (x *DB[T]) IndexExists(indexName string, sort int) (bool, error) {
+
+	indexName = GetIndexName(indexName, sort)
+
 	// 获取当前集合的索引列表
 	collection := GetCollection(x.tableName())
 	cursor, err := collection.Indexes().List(context.TODO())
@@ -463,6 +492,8 @@ func (x *DB[T]) IndexExists(indexName string) (bool, error) {
 func (x *DB[T]) tableName() string {
 	if x.table == "" {
 		x.table = strings.ToLower(fmt.Sprintf("%T", *new(T)))
+		// 将点号替换为下划线，例如 db.edgetype -> db_edgetype
+		x.table = strings.ReplaceAll(x.table, ".", "_")
 	}
 	return x.table
 }

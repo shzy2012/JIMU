@@ -64,7 +64,7 @@ func InitUserIndex() {
 	indexNames := []string{"phone", "passwd", "token"}
 	for i := 0; i < len(indexNames); i++ {
 		indexName := indexNames[i]
-		exist, _ := NewUser().IndexExists(indexName)
+		exist, _ := NewUser().IndexExists(indexName, 1)
 		if exist {
 			continue
 		}
