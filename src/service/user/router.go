@@ -1,7 +1,7 @@
 package user
 
 import (
-	"jimu/src/middleware/jwt"
+	"tolo/src/middleware/jwt"
 
 	"github.com/gin-gonic/gin"
 )

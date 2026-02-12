@@ -2,8 +2,8 @@ package user
 
 import (
 	"fmt"
-	"jimu/src/db"
-	"jimu/src/tools"
+	"tolo/src/db"
+	"tolo/src/tools"
 
 	"github.com/gin-gonic/gin"
 	"github.com/shzy2012/common/log"

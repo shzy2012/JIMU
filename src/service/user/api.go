@@ -1,7 +1,7 @@
 package user
 
 import (
-	"jimu/src/tools"
+	"tolo/src/tools"
 
 	"github.com/gin-gonic/gin"
 	"github.com/shzy2012/common/log"

@@ -1,13 +1,13 @@
 package service
 
 import (
-	"jimu/src/config"
-	"jimu/src/middleware/cors"
-	"jimu/src/middleware/jwt"
-	"jimu/src/service/example"
-	"jimu/src/service/user"
 	"os"
 	"strings"
+	"tolo/src/config"
+	"tolo/src/middleware/cors"
+	"tolo/src/middleware/jwt"
+	"tolo/src/service/example"
+	"tolo/src/service/user"
 
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
