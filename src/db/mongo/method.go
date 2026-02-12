@@ -140,6 +140,29 @@ func (x *DB[T]) UpdateMany(filter bson.M, data T) (int64, error) {
 	return res.ModifiedCount, nil
 }
 
+// UpdateManyRaw 根据自定义过滤条件和原始更新文档更新多条记录
+/*
+filter := bson.M{"order_no": "XSCKD2026", "status": "scanned"}
+update := bson.M{
+	"$set": bson.M{
+		"status":    "outstocked",
+		"update_at": time.Now(),
+	},
+}
+modified, err := db.NewQrCode().UpdateManyRaw(filter, update)
+*/
+func (x *DB[T]) UpdateManyRaw(filter bson.M, update bson.M) (int64, error) {
+	if filter == nil {
+		filter = bson.M{}
+	}
+	collection := GetCollection(x.tableName())
+	res, err := collection.UpdateMany(context.Background(), filter, update)
+	if err != nil {
+		return 0, err
+	}
+	return res.ModifiedCount, nil
+}
+
 // 删除一条记录
 func (x *DB[T]) Del(id primitive.ObjectID) error {
 	filter := bson.M{"_id": id}

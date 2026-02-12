@@ -34,7 +34,12 @@ func MongoClient() *mongo.Client {
 
 	var err error
 	//初始化 MongoDB
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	/*
+		ctx 仅用于控制【建立连接】的过程。一旦连接成功建立，mongoClient 会自行维护连接池，不再依赖此 ctx。
+		调用 cancel() 是为了释放 context.WithTimeout 启动的定时器资源，防止上下文泄露（内存泄露）。
+	*/
+	defer cancel()
 
 	//mongodb的用户名和密码是基于特定数据库的，而不是基于整个系统的。所有所有数据库db都需要设置密码
 	//mongodb://youruser2:yourpassword2@localhost/yourdatabase
